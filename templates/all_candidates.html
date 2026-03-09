@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Candidates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2027, #0a192f);
+            color: #e6f1ff;
+            min-height: 100vh;
+        }
+
+        .page-title {
+            color: #20c997;
+            font-weight: 600;
+        }
+
+        .card-dark {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        table {
+            color: #e6f1ff;
+        }
+
+        thead {
+            background: rgba(32, 201, 151, 0.2);
+        }
+
+        tbody tr {
+            background: rgba(255,255,255,0.03);
+            transition: 0.3s;
+        }
+
+        tbody tr:hover {
+            background: rgba(32, 201, 151, 0.08);
+        }
+
+        .progress {
+            height: 22px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .progress-bar {
+            font-weight: 500;
+        }
+
+        .btn-teal {
+            background-color: #20c997;
+            border: none;
+            color: #000;
+        }
+
+        .btn-teal:hover {
+            background-color: #17b38a;
+        }
+
+        .btn-outline-teal {
+            border: 1px solid #20c997;
+            color: #20c997;
+        }
+
+        .btn-outline-teal:hover {
+            background: #20c997;
+            color: #000;
+        }
+
+        .badge-success {
+            background-color: #20c997;
+        }
+
+        .badge-danger {
+            background-color: #ff4d4d;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title mb-0">All Candidates</h2>
+        <a href="/dashboard" class="btn btn-outline-teal">Back to Dashboard</a>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="mb-3">
+        <a href="/all-candidates" class="btn btn-outline-teal btn-sm me-2">
+            Show All
+        </a>
+
+        <a href="/all-candidates?status=shortlisted" class="btn btn-teal btn-sm">
+            Show Only Shortlisted
+        </a>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card card-dark p-3">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Candidate Name</th>
+                        <th>Applied Job</th>
+                        <th width="250">Match Score</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for c in candidates %}
+                    <tr>
+                        <td>{{ c.candidate_name }}</td>
+                        <td>{{ c.title }}</td>
+
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar
+                                    {% if c.match_score > 70 %}
+                                        bg-success
+                                    {% elif c.match_score > 50 %}
+                                        bg-warning
+                                    {% else %}
+                                        bg-danger
+                                    {% endif %}
+                                "
+                                role="progressbar"
+                                style="width: {{ c.match_score }}%;">
+                                    {{ "%.1f"|format(c.match_score) }}%
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if c.status == "Shortlisted" %}
+                                <span class="badge badge-success px-3 py-2">
+                                    🟢 Shortlisted
+                                </span>
+                            {% else %}
+                                <span class="badge badge-danger px-3 py-2">
+                                    🔴 Rejected
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

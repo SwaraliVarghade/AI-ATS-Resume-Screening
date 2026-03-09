@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ATS Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2027, #0b1b2b);
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        h2 {
+            color: #20c997;
+            font-weight: 600;
+        }
+
+        .card-custom {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            transition: 0.3s;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .btn-teal {
+            background-color: #20c997;
+            border: none;
+            color: #000;
+        }
+
+        .btn-teal:hover {
+            background-color: #17b089;
+        }
+
+        .btn-dark-outline {
+            border: 1px solid #20c997;
+            color: #20c997;
+        }
+
+        .btn-dark-outline:hover {
+            background-color: #20c997;
+            color: #000;
+        }
+
+       table {
+        background: transparent;
+        border-radius: 12px;
+        overflow: hidden;
+        color: #e6f1ff;
+    }
+
+    thead {
+        background: #0f2a3a;
+        color: #20c997;
+        border-bottom: 1px solid rgba(32, 201, 151, 0.3);
+    }
+
+    tbody tr {
+        background: rgba(255,255,255,0.03);
+        transition: 0.3s ease;
+    }
+
+    tbody tr:hover {
+        background: rgba(32, 201, 151, 0.08);
+    }
+
+    td, th {
+        border: none !important;
+        padding: 15px 20px !important;
+    }
+    
+
+        .chart-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            height: 350px;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="container py-4">
+
+    <!-- Top Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>AI Recruitment Dashboard</h2>
+        <div>
+            <a href="/all-candidates" class="btn btn-warning btn-custom me-2">
+                View All Candidates
+            </a>
+            <a href="/add-job" class="btn btn-teal btn-custom">
+                + Add Job
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card card-custom text-center p-3">
+                <h6>Total Jobs</h6>
+                <div class="stat-number text-info">{{ total_jobs }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-custom text-center p-3">
+                <h6>Total Candidates</h6>
+                <div class="stat-number text-warning">{{ total_candidates }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-custom text-center p-3">
+                <h6>Shortlisted</h6>
+                <div class="stat-number text-success">{{ shortlisted }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card card-custom text-center p-3">
+                <h6>Rejected</h6>
+                <div class="stat-number text-danger">{{ rejected }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Job Table -->
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Job Title</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for job in jobs %}
+                <tr>
+                    <td>
+                        <span class="job-title">{{ job.title }}</span>
+                    </td>
+                    <td class="text-end">
+                        <a href="/upload/{{ job.id }}" class="btn btn-sm btn-success btn-custom me-2">
+                            Upload Resume
+                        </a>
+                        <a href="/results/{{ job.id }}" class="btn btn-sm btn-dark-outline btn-custom">
+                            View Results
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-container">
+        <h5 class="text-center mb-3" style="color:#20c997;">Candidate Status Overview</h5>
+        <canvas id="statusChart"></canvas>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('statusChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Shortlisted', 'Rejected'],
+        datasets: [{
+            label: 'Candidates',
+            data: [{{ shortlisted }}, {{ rejected }}],
+            backgroundColor: ['#20c997', '#dc3545'],
+            borderRadius: 8,
+            barThickness: 60
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: { color: '#ffffff' }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#ffffff' },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            y: {
+                ticks: { color: '#ffffff' },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>
