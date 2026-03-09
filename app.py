@@ -8,11 +8,11 @@ import os
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
 
-# Create uploads folder if not exists
+
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
 
-# ================= SKILL MASTER LIST =================
+# Skill list
 SKILLS_LIST = [
     "python", "flask", "django",
     "html", "html5",
@@ -26,7 +26,7 @@ SKILLS_LIST = [
     "dom manipulation"
 ]
 
-# ================= DATABASE CONNECTION =================
+# Ddatabase Connection
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -36,7 +36,7 @@ db = mysql.connector.connect(
 
 cursor = db.cursor(dictionary=True)
 
-# ================= AI FUNCTION =================
+# AI function
 def calculate_similarity(job_desc, resume_text):
     if not resume_text.strip():
         return 0
@@ -46,7 +46,7 @@ def calculate_similarity(job_desc, resume_text):
     similarity = cosine_similarity(vectors[0], vectors[1])
     return float(similarity[0][0]) * 100
 
-# ================= LOGIN =================
+# Login
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -64,7 +64,7 @@ def login():
 
     return render_template("login.html")
 
-# ================= DASHBOARD =================
+# Dashboard
 @app.route("/dashboard")
 def dashboard():
     # Fetch jobs
@@ -91,7 +91,7 @@ def dashboard():
                            shortlisted=shortlisted,
                            rejected=rejected) 
 
-# ================= ADD JOB =================
+# add job
 @app.route("/add-job", methods=["GET", "POST"])
 def add_job():
     if request.method == "POST":
@@ -107,7 +107,7 @@ def add_job():
 
     return render_template("add_job.html")
 
-# ================= UPLOAD RESUME =================
+# Upload resume
 @app.route("/upload/<int:job_id>", methods=["GET", "POST"])
 def upload_resume(job_id):
     if request.method == "POST":
@@ -120,7 +120,6 @@ def upload_resume(job_id):
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
         file.save(filepath)
 
-        # Extract resume text
         reader = PdfReader(filepath)
         resume_text = ""
 
@@ -131,7 +130,6 @@ def upload_resume(job_id):
 
         resume_text_lower = resume_text.lower()
 
-        # Get job description
         cursor.execute("SELECT description FROM jobs WHERE id=%s", (job_id,))
         job = cursor.fetchone()
 
@@ -141,7 +139,7 @@ def upload_resume(job_id):
         job_desc = job["description"]
         job_desc_lower = job_desc.lower()
 
-        # ================= SKILL EXTRACTION =================
+        # skills
         resume_skills = [skill for skill in SKILLS_LIST if skill in resume_text_lower]
         job_skills = [skill for skill in SKILLS_LIST if skill in job_desc_lower]
 
@@ -151,13 +149,11 @@ def upload_resume(job_id):
         matched_skills_str = ", ".join(matched_skills)
         missing_skills_str = ", ".join(missing_skills)
 
-        # ================= AI SCORE =================
+        # AI SCORE
         score = calculate_similarity(job_desc, resume_text)
 
-        # ================= STATUS =================
         status = "Shortlisted" if score > 60 else "Rejected"
 
-        # ================= STORE DATA =================
         cursor.execute("""
             INSERT INTO resumes 
             (job_id, candidate_name, resume_text, match_score, 
@@ -179,7 +175,7 @@ def upload_resume(job_id):
 
     return render_template("upload_resume.html", job_id=job_id)
 
-# ================= RESULTS =================
+# Results
 @app.route("/results/<int:job_id>")
 def results(job_id):
     cursor.execute("""
@@ -191,7 +187,7 @@ def results(job_id):
 
     return render_template("results.html", results=results)
 
-# ================= ALL CANDIDATES =================
+#All candidates
 @app.route("/all-candidates")
 def all_candidates():
     status_filter = request.args.get("status")
@@ -215,6 +211,5 @@ def all_candidates():
 
     return render_template("all_candidates.html", candidates=candidates)
 
-# ================= RUN SERVER =================
 if __name__ == "__main__":
     app.run(debug=True)
